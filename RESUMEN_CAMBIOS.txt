@@ -1,0 +1,190 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║              ATLAS VIRTUAL DE HISTOLOGÍA - VERSIÓN GITHUB PAGES              ║
+║                                                                              ║
+║                        TODO ESTÁ LISTO PARA DESPLEGAR                        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 ¿QUÉ SE MODIFICÓ?
+
+Se optimizó el proyecto para funcionar ÚNICAMENTE con GitHub Pages.
+Removidas todas las dependencias de Netlify.
+
+Cambios realizados:
+
+✅ .github/workflows/deploy.yml
+   ├─ ANTES: BASE_PATH se calculaba pero no se usaba
+   └─ AHORA: Se pasa como variable de entorno al build
+
+✅ index.html
+   ├─ ANTES: Incluía script de Netlify Identity
+   └─ AHORA: HTML limpio, sin dependencias externas
+
+✅ Archivos creados:
+   ├─ COMIENZA_AQUI.md ..................... LEE ESTO PRIMERO
+   ├─ GITHUB_PAGES_SETUP.md ............... Guía completa paso a paso
+   ├─ CAMBIOS_GITHUB_PAGES.md ............. Detalles técnicos
+   ├─ CHECKLIST.md ........................ Verificación interactiva
+   ├─ deploy.sh ........................... Script para subir código
+   └─ .nojekyll ........................... Para GitHub Pages
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 LO QUE NECESITAS HACER EN 5 MINUTOS:
+
+1. Crear repositorio: https://github.com/new
+   → Nombre: atlas-histologia
+   → IMPORTANTE: Marcar PUBLIC ✓
+
+2. Subir código:
+   git init
+   git add .
+   git commit -m "Atlas Virtual de Histología"
+   git branch -M main
+   git remote add origin https://github.com/TU_USUARIO/atlas-histologia.git
+   git push -u origin main
+
+3. Activar GitHub Pages:
+   Settings → Pages → Deploy from a branch → main/root → Save
+
+4. Esperar 2 minutos ⏳
+
+5. Acceder a: https://TU_USUARIO.github.io/atlas-histologia/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTACIÓN INCLUIDA (en orden de lectura):
+
+1. 📖 COMIENZA_AQUI.md
+   → Guía rápida de 5 minutos
+   → Qué necesitas hacer ahora
+   → Preguntas frecuentes
+   ⭐ LEE ESTO PRIMERO ⭐
+
+2. 📖 GITHUB_PAGES_SETUP.md
+   → Guía completa y detallada
+   → Instrucciones paso a paso
+   → Solución de problemas
+   → Desarrollo local
+   ⭐ LEE ESTO SI NECESITAS MÁS DETALLES ⭐
+
+3. ✅ CHECKLIST.md
+   → Lista interactiva
+   → Verifica que completaste todo
+   → Útil para no olvidar pasos
+
+4. 📋 CAMBIOS_GITHUB_PAGES.md
+   → Para desarrolladores
+   → Explica qué cambió y por qué
+   → Detalles técnicos
+
+5. 🔧 deploy.sh
+   → Script bash para subir código
+   → Ejecutar: bash deploy.sh
+   → Facilita los pushes futuros
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ CARACTERÍSTICAS INCLUIDAS:
+
+✅ React 19 + TypeScript
+✅ Vite (build rápido)
+✅ Tailwind CSS (estilos)
+✅ GitHub Actions (despliegue automático)
+✅ 5 especímenes histológicos de ejemplo
+✅ Imágenes de alta calidad
+✅ Sistema de marcadores interactivos
+✅ Responsivo (funciona en celular)
+✅ Optimización automática de assets
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ DESARROLLO LOCAL (si lo deseas):
+
+npm install        # Instalar dependencias
+npm run dev        # Servidor local en http://localhost:5173
+npm run build      # Compilar para producción
+npm run preview    # Ver cómo se vería en producción
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+➕ AGREGAR NUEVOS PREPARADOS:
+
+Edita estos archivos:
+
+1. content/preparados/nombre.json
+   → Define el espécimen (nombre, tejido, tinción, etc.)
+
+2. public/images/nombre.jpg
+   → La foto del preparado histológico
+
+3. src/App.tsx
+   → Importa el JSON nuevo
+
+4. git push
+   → Se despliega automáticamente en ~2 minutos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ LO QUE NO ESTÁ INCLUIDO (por opción de GitHub Pages puro):
+
+✗ Netlify CMS → Requiere Netlify (no GitHub Pages)
+✗ Panel de login → Requiere backend
+✗ netlify.toml → No se usa en GitHub Pages
+
+Si necesitas estas funciones, debes usar Netlify en lugar de GitHub Pages.
+Consulta el README.md original para esas instrucciones.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆘 PROBLEMAS COMUNES:
+
+❓ El sitio no aparece
+   → Espera 5 minutos
+   → Verifica que el repo sea PUBLIC
+   → Ve a Actions y busca errores
+
+❓ Los estilos se ven mal
+   → Vacía caché: Ctrl+Shift+Delete
+   → Recarga: Ctrl+F5
+
+❓ Las imágenes no cargan
+   → Verifica que estén en public/images/
+   → Usa rutas que empiezan con /
+
+❓ No funciona el script deploy.sh
+   → Asegúrate de tener Git instalado
+   → Ejecuta: chmod +x deploy.sh
+   → Luego: bash deploy.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 CONTACTO:
+
+Área de Histología y Embriología
+Facultad de Ciencias Médicas
+UNCUYO - Mendoza, Argentina
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 ¡TODO ESTÁ LISTO! Solo necesitas:
+
+1. Crear el repositorio en GitHub
+2. Subir los archivos
+3. Activar GitHub Pages
+4. Esperar 2 minutos
+
+Lee COMIENZA_AQUI.md para comenzar.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Fecha de preparación: 2025-08-20
+Versión: GitHub Pages 1.0
+Estado: ✅ LISTO PARA PRODUCCIÓN
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    ¡GRACIAS POR USAR ATLAS VIRTUAL!                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
