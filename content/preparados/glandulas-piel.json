@@ -1,0 +1,52 @@
+{
+  "id": 7,
+  "slug": "glandulas-piel",
+  "name": "Glándulas (piel)",
+  "tissue": "Tejido epitelial glandular",
+  "structure": "Sebácea y sudoprípara",
+  "stain": "H&E",
+  "img": "/images/07-glandulas-piel-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 63.4,
+      "y": 82.1,
+      "label": "1"
+    },
+    {
+      "x": 45.5,
+      "y": 36.7,
+      "label": "2"
+    },
+    {
+      "x": 86.9,
+      "y": 35.5,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Glándula sudorípara"
+    },
+    {
+      "label": "2",
+      "text": "Glándula sebácea"
+    },
+    {
+      "label": "3",
+      "text": "Folículo piloso"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué estructura es?",
+      "answer": "Glándula sudorípara"
+    },
+    {
+      "marker": "2",
+      "question": "¿Qué estructura es?",
+      "answer": "Glándula sebácea"
+    }
+  ]
+}
