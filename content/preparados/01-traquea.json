@@ -1,0 +1,23 @@
+{
+  "img": "/images/01-revestimiento-traquea-he.jpg",
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Epitelio pseudoestratificado cilíndrico ciliado con células caliciformes."
+    }
+  ],
+  "tissue": "Tejido Epitelial de Revestimiento",
+  "stain": "H&E",
+  "name": "Traquea",
+  "slug": "01-traquea",
+  "structure": "Epitelio de Revestimiento de la traquea",
+  "markers": [
+    {
+      "label": "1",
+      "x": 50,
+      "y": 68,
+      "text": "Epitelio Respiratorio"
+    }
+  ],
+  "id": 1
+}
