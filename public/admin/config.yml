@@ -1,0 +1,55 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+publish_mode: simple
+
+collections:
+  - name: "preparados"
+    label: "Preparados"
+    label_singular: "Preparado"
+    folder: "content/preparados"
+    create: true
+    slug: "{{fields.slug}}"
+    identifier_field: "name"
+    summary: "{{name}} — {{tissue}}"
+    fields:
+      - { label: "ID interno (no repetir)", name: "id", widget: "number", value_type: "int", hint: "Un número único, ej: 5, 6, 7... (no lo repitas entre preparados)" }
+      - { label: "Slug (solo minúsculas, sin espacios ni tildes)", name: "slug", widget: "string", hint: "Ej: nervio-periferico-05" }
+      - { label: "Nombre del preparado", name: "name", widget: "string" }
+      - label: "Tejido"
+        name: "tissue"
+        widget: "select"
+        options:
+          - "Tejido Epitelial de Revestimiento"
+          - "Tejido Conectivo"
+          - "Tejido Muscular"
+          - "Tejido Nervioso"
+        hint: "Si es un tejido nuevo que no está en la lista, avisá para agregarlo."
+      - { label: "Estructura", name: "structure", widget: "string" }
+      - label: "Tinción"
+        name: "stain"
+        widget: "select"
+        options: ["H&E", "PAS", "Tricrómico de Masson", "Otra"]
+        default: "H&E"
+      - { label: "Foto del preparado", name: "img", widget: "image" }
+      - label: "Flechas (marcadores)"
+        name: "markers"
+        widget: "list"
+        summary: "{{fields.label}} — {{fields.question}}"
+        hint: "Para saber los valores exactos de x e y sin adivinar, subí la foto en la herramienta '/admin/marcador.html' (se abre en otra pestaña), hacé clic en el punto exacto y copiá los dos números que te muestra."
+        fields:
+          - { label: "Número/label de la flecha", name: "label", widget: "string" }
+          - { label: "Posición horizontal (% desde la izquierda, 0-100)", name: "x", widget: "number", value_type: "float" }
+          - { label: "Posición vertical (% desde arriba, 0-100)", name: "y", widget: "number", value_type: "float" }
+          - { label: "Pregunta para el Modo Repaso", name: "question", widget: "string", required: false, hint: "Ej: ¿Qué tipo de epitelio es este? Si lo dejás vacío, se usa la pregunta genérica por defecto." }
+      - label: "Anotaciones"
+        name: "annotations"
+        widget: "list"
+        summary: "{{fields.label}} — {{fields.text}}"
+        fields:
+          - { label: "Número/label (debe coincidir con una flecha)", name: "label", widget: "string" }
+          - { label: "Texto explicativo", name: "text", widget: "text" }
