@@ -1,15 +1,43 @@
 {
   "id": 3,
-  "slug": "03-rinon-2",
+  "slug": "rinon",
   "name": "Riñón",
   "tissue": "Tejido Epitelial de Revestimiento",
-  "structure": "Glomérulo y Túbulos contorneados",
+  "structure": "Glomérulo y túbulos contorneados",
   "stain": "H&E",
   "img": "/images/03-rinon-he-revestimiento.jpg",
   "markers": [
-    { "label": "1", "x": 76, "y": 26 }
+    {
+      "x": 37.3,
+      "y": 40.8,
+      "label": "1"
+    },
+    {
+      "x": 76.2,
+      "y": 25.7,
+      "label": "2"
+    }
   ],
   "annotations": [
-    { "label": "1", "text": "Epitelio simple cúbico con placas de membrana o placas de urotelio." }
+    {
+      "label": "1",
+      "text": "Epitelio simple plano"
+    },
+    {
+      "label": "2",
+      "text": "Epitelio simple cúbico con placas de membrana o placas de urotelio"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué tejido es?",
+      "answer": "Tejido epitelial de revestimiento simple plano"
+    },
+    {
+      "marker": "2",
+      "question": "¿Qué tejido es?",
+      "answer": "Tejido epitelial de revestimiento simple cúbico"
+    }
   ]
 }
