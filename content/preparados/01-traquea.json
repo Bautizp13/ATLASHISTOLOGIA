@@ -1,23 +1,29 @@
 {
-  "img": "/images/01-revestimiento-traquea-he.jpg",
+  "id": 1,
+  "slug": "preparado-de-traquea",
+  "name": "Preparado de Tráquea",
+  "tissue": "Tejido Epitelial de Revestimiento",
+  "structure": "Epitelio respiratorio",
+  "stain": "H&E",
+  "img": "/images/01-traquea-revestimiento.jpg",
+  "markers": [
+    {
+      "x": 60,
+      "y": 68.4,
+      "label": "1"
+    }
+  ],
   "annotations": [
     {
       "label": "1",
       "text": "Epitelio pseudoestratificado cilíndrico ciliado con células caliciformes."
     }
   ],
-  "tissue": "Tejido Epitelial de Revestimiento",
-  "stain": "H&E",
-  "name": "Traquea",
-  "slug": "01-traquea",
-  "structure": "Epitelio de Revestimiento de la traquea",
-  "markers": [
+  "flashcards": [
     {
-      "label": "1",
-      "x": 50,
-      "y": 68,
-      "text": "Epitelio Respiratorio"
+      "marker": "1",
+      "question": "Indique que epitelio y que órgano marca la flecha",
+      "answer": "Epitelio pseudoestratificado cilíndrico ciliado con células caliciformes. Tráquea"
     }
-  ],
-  "id": 1
+  ]
 }
