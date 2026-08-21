@@ -69,6 +69,8 @@ const SLIDES: Slide[] = Object.values(preparadoFiles)
 // su "label"; acá se resuelve esa referencia contra slide.markers para saber
 // dónde dibujar la flecha en la imagen. Si la flecha referenciada no existe
 // (por ejemplo se borró), esa pregunta se descarta en vez de romper la app.
+// Si dos flechas del mismo preparado comparten la misma etiqueta, se usa la
+// primera que aparece — cualquiera de las dos sirve, apuntan a lo mismo.
 const REVIEW_CARDS: ReviewCard[] = SLIDES.flatMap((slide) =>
   slide.flashcards
     .map((fc) => {
@@ -78,6 +80,19 @@ const REVIEW_CARDS: ReviewCard[] = SLIDES.flatMap((slide) =>
     })
     .filter((c): c is ReviewCard => c !== null)
 )
+
+// Lista de temas/tejidos disponibles para el selector de Modo Repaso, en el
+// orden en que aparecen los preparados (sin duplicados).
+const ALL_TISSUES: string[] = Array.from(new Set(SLIDES.map((s) => s.tissue)))
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 // Color per tissue block
 const TISSUE_COLORS: Record<string, { accent: string; bg: string; border: string; badge: string }> = {
@@ -173,8 +188,8 @@ function SlideCard({ slide }: { slide: Slide }) {
           alt={slide.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-        {showMarked && slide.markers.map(m => (
-          <RedArrow key={m.label} x={m.x} y={m.y} label={m.label} />
+        {showMarked && slide.markers.map((m, i) => (
+          <RedArrow key={m.label + '-' + i} x={m.x} y={m.y} label={m.label} />
         ))}
         {!showMarked && (
           <div style={{
@@ -194,8 +209,8 @@ function SlideCard({ slide }: { slide: Slide }) {
           <p style={{ margin: '0 0 4px', fontSize: '10.5px', letterSpacing: '0.1em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
             Estructuras marcadas
           </p>
-          {slide.annotations.map(a => (
-            <div key={a.label} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+          {slide.annotations.map((a, i) => (
+            <div key={a.label + '-' + i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <span style={{
                 flexShrink: 0, width: '22px', height: '22px', borderRadius: '50%',
                 background: tc.accent, color: '#fff', fontSize: '10px', fontWeight: 700,
@@ -274,6 +289,39 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
   )
 }
 
+// ─── Selector de temas (Modo Repaso) ──────────────────────────────────────────
+// Elegir "Todos", uno solo, o varios tejidos a la vez. Con más de uno
+// seleccionado, el mazo sale mezclado (no agrupado por tema).
+
+function TopicSelector({ selected, onToggle, onSelectAll }: {
+  selected: string[]; onToggle: (tissue: string) => void; onSelectAll: () => void
+}) {
+  const allSelected = selected.length === ALL_TISSUES.length
+
+  const chipStyle = (active: boolean) => ({
+    padding: '7px 16px', borderRadius: '20px',
+    border: active ? '1.5px solid #6a4c93' : '1.5px solid rgba(200,140,165,0.35)',
+    background: active ? '#6a4c93' : 'transparent',
+    color: active ? '#fff' : 'var(--muted)',
+    fontSize: '12.5px', fontWeight: active ? 600 : 500,
+    cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s ease',
+  })
+
+  return (
+    <div style={{
+      display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center',
+      marginBottom: '28px', maxWidth: '680px', marginLeft: 'auto', marginRight: 'auto',
+    }}>
+      <button onClick={onSelectAll} style={chipStyle(allSelected)}>Todos los temas</button>
+      {ALL_TISSUES.map(t => (
+        <button key={t} onClick={() => onToggle(t)} style={chipStyle(selected.includes(t))}>
+          {t}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ─── Flashcard ────────────────────────────────────────────────────────────────
 // Recibe una ReviewCard (preparado + flecha concreta + pregunta + respuesta),
 // no un Slide entero: un mismo preparado puede aportar varias tarjetas.
@@ -288,12 +336,12 @@ function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0' }}>
 
-      {/* Progress */}
+      {/* Progress — a propósito no muestra a qué preparado pertenece la flecha,
+          para no regalar la respuesta antes de tiempo. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
         <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
           Pregunta <strong style={{ color: 'var(--text)' }}>{index + 1}</strong> de {total}
         </span>
-        <span style={{ fontSize: '11.5px', color: 'var(--muted)' }}>{slide.name}</span>
       </div>
 
       {/* Card */}
@@ -323,7 +371,7 @@ function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
         <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f3e8ec' }}>
           <img
             src={slide.img}
-            alt={slide.name}
+            alt="Preparado histológico"
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
           <RedArrow x={marker.x} y={marker.y} label="?" />
@@ -364,6 +412,10 @@ function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
                   </p>
                 </div>
               </div>
+              {/* El nombre del preparado recién se muestra acá, después de revelar */}
+              <p style={{ margin: '10px 2px 0', fontSize: '11.5px', color: 'var(--muted)' }}>
+                Preparado: {slide.name}
+              </p>
             </div>
           )}
         </div>
@@ -507,6 +559,40 @@ export default function App() {
   const [revealed, setRevealed] = useState(false)
   const [query, setQuery] = useState('')
   const [welcomed, setWelcomed] = useState(false)
+
+  // ── Modo Repaso: qué temas están habilitados y el mazo (mezclado si hay más de uno) ──
+  const [selectedTissues, setSelectedTissues] = useState<string[]>(ALL_TISSUES)
+  const [deck, setDeck] = useState<ReviewCard[]>(() => REVIEW_CARDS)
+
+  function buildDeck(tissues: string[]) {
+    const filtered = REVIEW_CARDS.filter(c => tissues.includes(c.slide.tissue))
+    // Con un solo tema se respeta el orden de carga; con dos o más se mezcla
+    // para que no salgan todas las preguntas de un tema seguidas.
+    return tissues.length > 1 ? shuffle(filtered) : filtered
+  }
+
+  useEffect(() => {
+    setDeck(buildDeck(selectedTissues))
+    setCardIndex(0)
+    setRevealed(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTissues])
+
+  function toggleTissue(t: string) {
+    setSelectedTissues(prev => {
+      if (prev.includes(t)) {
+        const next = prev.filter(x => x !== t)
+        return next.length === 0 ? prev : next
+      }
+      return [...prev, t]
+    })
+  }
+  function selectAllTissues() { setSelectedTissues(ALL_TISSUES) }
+  function reshuffleDeck() {
+    setDeck(buildDeck(selectedTissues))
+    setCardIndex(0)
+    setRevealed(false)
+  }
 
   const filtered = query.trim()
     ? SLIDES.filter(s =>
@@ -658,7 +744,7 @@ export default function App() {
         {/* ── REPASO ── */}
         {tab === 'repaso' && (
           <>
-            <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+            <div style={{ marginBottom: '32px', textAlign: 'center' }}>
               <p style={{ margin: '0 0 6px', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#b5365a', fontWeight: 600 }}>
                 Modo Repaso
               </p>
@@ -670,16 +756,24 @@ export default function App() {
               </p>
             </div>
 
-            {REVIEW_CARDS.length === 0 ? (
+            <TopicSelector selected={selectedTissues} onToggle={toggleTissue} onSelectAll={selectAllTissues} />
+
+            {deck.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-                <p className="font-display" style={{ fontSize: '22px', margin: '0 0 8px', color: '#b5365a' }}>Todavía no hay preguntas</p>
-                <p style={{ margin: 0, fontSize: '14px' }}>Cargá preguntas de Modo Repaso desde el generador de preparados.</p>
+                <p className="font-display" style={{ fontSize: '22px', margin: '0 0 8px', color: '#b5365a' }}>
+                  {REVIEW_CARDS.length === 0 ? 'Todavía no hay preguntas' : 'No hay preguntas para ese tema'}
+                </p>
+                <p style={{ margin: 0, fontSize: '14px' }}>
+                  {REVIEW_CARDS.length === 0
+                    ? 'Cargá preguntas de Modo Repaso desde el generador de preparados.'
+                    : 'Elegí otro tema arriba, o "Todos los temas".'}
+                </p>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {(() => {
                   const RepasoMascot = revealed ? MastocitoSorprendido : MastocitoPensando
-                  const safeIndex = Math.min(cardIndex, REVIEW_CARDS.length - 1)
+                  const safeIndex = Math.min(cardIndex, deck.length - 1)
                   return (
                     <>
                       <RepasoMascot
@@ -707,14 +801,29 @@ export default function App() {
                         </div>
                         <div style={{ position: 'relative', zIndex: 1 }}>
                           <Flashcard
-                            card={REVIEW_CARDS[safeIndex]}
+                            card={deck[safeIndex]}
                             index={safeIndex}
-                            total={REVIEW_CARDS.length}
+                            total={deck.length}
                             revealed={revealed}
                             onReveal={() => setRevealed(true)}
-                            onNext={() => { setCardIndex(i => Math.min(i + 1, REVIEW_CARDS.length - 1)); setRevealed(false) }}
+                            onNext={() => { setCardIndex(i => Math.min(i + 1, deck.length - 1)); setRevealed(false) }}
                             onPrev={() => { setCardIndex(i => Math.max(i - 1, 0)); setRevealed(false) }}
                           />
+                          {selectedTissues.length > 1 && (
+                            <div style={{ textAlign: 'center', marginTop: '14px' }}>
+                              <button
+                                onClick={reshuffleDeck}
+                                style={{
+                                  padding: '7px 16px', borderRadius: '18px',
+                                  border: '1.5px solid rgba(106,76,147,0.3)', background: 'transparent',
+                                  color: '#6a4c93', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer',
+                                  fontFamily: 'Inter, sans-serif',
+                                }}
+                              >
+                                🔀 Mezclar de nuevo
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </>
