@@ -1,0 +1,46 @@
+{
+  "id": 10,
+  "slug": "glandulas-sudoriparas-piel",
+  "name": "Glándulas sudoríparas-Piel.",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glándulas sudoríparas.",
+  "stain": "H&E",
+  "img": "/images/11-glandulassudoriparas-piel-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 56.5,
+      "y": 31.3,
+      "label": "1"
+    },
+    {
+      "x": 52.3,
+      "y": 26.1,
+      "label": "1"
+    },
+    {
+      "x": 83.5,
+      "y": 27.9,
+      "label": "2"
+    },
+    {
+      "x": 75.8,
+      "y": 73.1,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Células mioepiteliales."
+    },
+    {
+      "label": "2",
+      "text": "Conductor excretor de glándula sudorípara, Epitelio cúbico biestratificado."
+    },
+    {
+      "label": "3",
+      "text": "Adenómero de glándula sudorípara."
+    }
+  ],
+  "flashcards": []
+}

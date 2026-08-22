@@ -1,0 +1,28 @@
+{
+  "id": 9,
+  "slug": "glandulas-piel",
+  "name": "Glándulas-Piel",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glándulas sebáceas",
+  "stain": "H&E",
+  "img": "/images/09-glandulas-piel-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 71.6,
+      "y": 60.5,
+      "label": "1"
+    },
+    {
+      "x": 59.8,
+      "y": 79.1,
+      "label": "1"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Células basales (regeneran la glándula)"
+    }
+  ],
+  "flashcards": []
+}
