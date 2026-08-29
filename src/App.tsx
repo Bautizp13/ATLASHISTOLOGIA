@@ -361,7 +361,7 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
           alignItems: 'flex-start',
           marginBottom: '32px',
         }}>
-          {uniqueNames.length > 1 && (
+          {(uniqueNames.length > 1 || visibleSlides.length > 1) && (
             <aside className="tissue-sidebar" style={{
               flex: '0 0 180px',
               width: '180px',
@@ -371,24 +371,26 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
               flexDirection: 'column',
               gap: '14px',
             }}>
-              <div style={{
-                background: tc.bg,
-                border: `1px solid ${tc.border}`,
-                borderRadius: '12px',
-                padding: '14px',
-              }}>
-                <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
-                  Preparados
-                </p>
-                <PreparadoSelector
-                  names={uniqueNames}
-                  selected={selectedNames}
-                  onToggle={toggleName}
-                  onSelectAll={selectAllNames}
-                  accent={tc.accent}
-                  layout="column"
-                />
-              </div>
+              {uniqueNames.length > 1 && (
+                <div style={{
+                  background: tc.bg,
+                  border: `1px solid ${tc.border}`,
+                  borderRadius: '12px',
+                  padding: '14px',
+                }}>
+                  <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
+                    Preparados
+                  </p>
+                  <PreparadoSelector
+                    names={uniqueNames}
+                    selected={selectedNames}
+                    onToggle={toggleName}
+                    onSelectAll={selectAllNames}
+                    accent={tc.accent}
+                    layout="column"
+                  />
+                </div>
+              )}
 
               {visibleSlides.length > 1 && (
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -780,13 +782,12 @@ export default function App() {
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
             <MastocitoSaludando height={46} animate={false} />
-            <span style={{
-              fontFamily: 'Belanosima, sans-serif',
-              fontWeight: 800,
-              fontSize: '17px',
+            <span className="font-display" style={{
+              fontWeight: 400,
+              fontSize: '19px',
               color: 'var(--rose-dark)',
               letterSpacing: '0.2px',
-              lineHeight: '21px',
+              lineHeight: '22px',
               border: 'none',
               textAlign: 'left',
               whiteSpace: 'normal',
