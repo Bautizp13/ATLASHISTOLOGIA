@@ -1,0 +1,43 @@
+{
+  "id": 13,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glándulas",
+  "stain": "H&E",
+  "img": "/images/15-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 76.6,
+      "y": 81,
+      "label": "1"
+    },
+    {
+      "x": 91.8,
+      "y": 87.1,
+      "label": "2"
+    },
+    {
+      "x": 17.1,
+      "y": 81.6,
+      "label": "2"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Glándulas mucosas"
+    },
+    {
+      "label": "2",
+      "text": "Glándulas serosas"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "2",
+      "question": "¿Qué estructura señala la flecha?",
+      "answer": "Glándulas mucosas"
+    }
+  ]
+}
