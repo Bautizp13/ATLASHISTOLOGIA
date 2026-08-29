@@ -284,6 +284,9 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
   // todos seleccionados.
   const [selectedNames, setSelectedNames] = useState<string[]>(() => uniqueNames)
 
+  // Índice del preparado que se está mostrando ahora mismo (uno por vez, tipo carrusel).
+  const [currentIndex, setCurrentIndex] = useState(0)
+
   // Si una búsqueda activa hace que este bloque tenga resultados, se abre solo
   useEffect(() => {
     if (defaultOpen) setOpen(true)
@@ -294,6 +297,7 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
   // resultados nuevos por una selección vieja.
   useEffect(() => {
     setSelectedNames(Array.from(new Set(slides.map(s => s.name))))
+    setCurrentIndex(0)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slides])
 
@@ -305,10 +309,13 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
       }
       return [...prev, name]
     })
+    setCurrentIndex(0)
   }
-  function selectAllNames() { setSelectedNames(uniqueNames) }
+  function selectAllNames() { setSelectedNames(uniqueNames); setCurrentIndex(0) }
 
   const visibleSlides = slides.filter(s => selectedNames.includes(s.name))
+  const safeIndex = Math.min(currentIndex, Math.max(visibleSlides.length - 1, 0))
+  const currentSlide = visibleSlides[safeIndex]
 
   return (
     <section style={{ marginBottom: '20px' }}>
@@ -360,38 +367,75 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
               width: '180px',
               position: 'sticky',
               top: '16px',
-              background: tc.bg,
-              border: `1px solid ${tc.border}`,
-              borderRadius: '12px',
-              padding: '14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
             }}>
-              <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
-                Preparados
-              </p>
-              <PreparadoSelector
-                names={uniqueNames}
-                selected={selectedNames}
-                onToggle={toggleName}
-                onSelectAll={selectAllNames}
-                accent={tc.accent}
-                layout="column"
-              />
+              <div style={{
+                background: tc.bg,
+                border: `1px solid ${tc.border}`,
+                borderRadius: '12px',
+                padding: '14px',
+              }}>
+                <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
+                  Preparados
+                </p>
+                <PreparadoSelector
+                  names={uniqueNames}
+                  selected={selectedNames}
+                  onToggle={toggleName}
+                  onSelectAll={selectAllNames}
+                  accent={tc.accent}
+                  layout="column"
+                />
+              </div>
+
+              {visibleSlides.length > 1 && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => setCurrentIndex(i => Math.max(i - 1, 0))}
+                    disabled={safeIndex === 0}
+                    style={{
+                      flex: 1, padding: '9px 0', borderRadius: '9px',
+                      border: `1.5px solid ${tc.border}`, background: 'transparent',
+                      color: tc.accent, fontSize: '12.5px', fontWeight: 600,
+                      cursor: safeIndex === 0 ? 'default' : 'pointer', fontFamily: 'Inter, sans-serif',
+                      opacity: safeIndex === 0 ? 0.4 : 1,
+                    }}
+                  >
+                    ← Anterior
+                  </button>
+                  <button
+                    onClick={() => setCurrentIndex(i => Math.min(i + 1, visibleSlides.length - 1))}
+                    disabled={safeIndex === visibleSlides.length - 1}
+                    style={{
+                      flex: 1, padding: '9px 0', borderRadius: '9px',
+                      border: 'none', background: tc.accent,
+                      color: '#fff', fontSize: '12.5px', fontWeight: 600,
+                      cursor: safeIndex === visibleSlides.length - 1 ? 'default' : 'pointer', fontFamily: 'Inter, sans-serif',
+                      opacity: safeIndex === visibleSlides.length - 1 ? 0.4 : 1,
+                    }}
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+              )}
+
+              {visibleSlides.length > 1 && (
+                <p style={{ margin: 0, textAlign: 'center', fontSize: '11.5px', color: 'var(--muted)' }}>
+                  Preparado {safeIndex + 1} de {visibleSlides.length}
+                </p>
+              )}
             </aside>
           )}
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            {visibleSlides.length === 0 ? (
+            {!currentSlide ? (
               <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--muted)' }}>
                 <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado a la izquierda para verlo.</p>
               </div>
             ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))',
-                gap: '20px',
-              }}>
-                {visibleSlides.map(s => <SlideCard key={s.id} slide={s} />)}
-              </div>
+              <SlideCard key={currentSlide.id} slide={currentSlide} />
             )}
           </div>
         </div>
