@@ -232,22 +232,33 @@ function SlideCard({ slide }: { slide: Slide }) {
 // (ej: "Pie", "Tráquea", "Riñón") se muestran dentro de un mismo bloque de
 // tejido. Selección múltiple: podés dejar tildados solo los que te interesan.
 
-function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent }: {
+function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent, layout = 'row' }: {
   names: string[]; selected: string[]; onToggle: (name: string) => void; onSelectAll: () => void; accent: string
+  layout?: 'row' | 'column'
 }) {
   const allSelected = selected.length === names.length
+  const vertical = layout === 'column'
 
   const chipStyle = (active: boolean) => ({
-    padding: '6px 14px', borderRadius: '18px',
+    padding: vertical ? '8px 12px' : '6px 14px',
+    borderRadius: vertical ? '10px' : '18px',
+    textAlign: 'left' as const,
     border: active ? `1.5px solid ${accent}` : '1.5px solid rgba(200,140,165,0.35)',
     background: active ? accent : 'transparent',
     color: active ? '#fff' : 'var(--muted)',
-    fontSize: '12px', fontWeight: active ? 600 : 500,
+    fontSize: '12.5px', fontWeight: active ? 600 : 500,
     cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s ease',
+    width: vertical ? '100%' : 'auto',
   })
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '20px' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: vertical ? 'column' : 'row',
+      flexWrap: vertical ? 'nowrap' : 'wrap',
+      gap: '7px',
+      marginBottom: vertical ? 0 : '20px',
+    }}>
       <button onClick={onSelectAll} style={chipStyle(allSelected)}>Todos</button>
       {names.map(name => (
         <button key={name} onClick={() => onToggle(name)} style={chipStyle(selected.includes(name))}>
@@ -335,34 +346,55 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
         </svg>
       </button>
 
-      {/* Selector de preparados + Cards grid */}
+      {/* Barra lateral de preparados + Cards grid, lado a lado */}
       {open && (
-        <>
+        <div className="tissue-body" style={{
+          display: 'flex',
+          gap: '24px',
+          alignItems: 'flex-start',
+          marginBottom: '32px',
+        }}>
           {uniqueNames.length > 1 && (
-            <PreparadoSelector
-              names={uniqueNames}
-              selected={selectedNames}
-              onToggle={toggleName}
-              onSelectAll={selectAllNames}
-              accent={tc.accent}
-            />
+            <aside className="tissue-sidebar" style={{
+              flex: '0 0 180px',
+              width: '180px',
+              position: 'sticky',
+              top: '16px',
+              background: tc.bg,
+              border: `1px solid ${tc.border}`,
+              borderRadius: '12px',
+              padding: '14px',
+            }}>
+              <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
+                Preparados
+              </p>
+              <PreparadoSelector
+                names={uniqueNames}
+                selected={selectedNames}
+                onToggle={toggleName}
+                onSelectAll={selectAllNames}
+                accent={tc.accent}
+                layout="column"
+              />
+            </aside>
           )}
 
-          {visibleSlides.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--muted)', marginBottom: '32px' }}>
-              <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado arriba para verlo.</p>
-            </div>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(440px, 100%), 1fr))',
-              gap: '20px',
-              marginBottom: '32px',
-            }}>
-              {visibleSlides.map(s => <SlideCard key={s.id} slide={s} />)}
-            </div>
-          )}
-        </>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {visibleSlides.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--muted)' }}>
+                <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado a la izquierda para verlo.</p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(380px, 100%), 1fr))',
+                gap: '20px',
+              }}>
+                {visibleSlides.map(s => <SlideCard key={s.id} slide={s} />)}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </section>
   )
@@ -991,6 +1023,10 @@ export default function App() {
         @media (max-width: 780px) {
           .mascot-pensando-side { display: none; }
           .mascot-pensando-top { display: flex; }
+        }
+        @media (max-width: 640px) {
+          .tissue-body { flex-direction: column; }
+          .tissue-sidebar { position: static; width: 100%; flex-basis: auto; }
         }
       `}</style>
       </div>
