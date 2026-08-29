@@ -232,10 +232,10 @@ function SlideCard({ slide }: { slide: Slide }) {
 // (ej: "Pie", "Tráquea", "Riñón") se muestran dentro de un mismo bloque de
 // tejido. Selección múltiple: podés dejar tildados solo los que te interesan.
 
-function PreparadoSelector({ slides, selected, onToggle, onSelectAll, accent }: {
-  slides: Slide[]; selected: string[]; onToggle: (name: string) => void; onSelectAll: () => void; accent: string
+function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent }: {
+  names: string[]; selected: string[]; onToggle: (name: string) => void; onSelectAll: () => void; accent: string
 }) {
-  const allSelected = selected.length === slides.length
+  const allSelected = selected.length === names.length
 
   const chipStyle = (active: boolean) => ({
     padding: '6px 14px', borderRadius: '18px',
@@ -249,9 +249,9 @@ function PreparadoSelector({ slides, selected, onToggle, onSelectAll, accent }: 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '20px' }}>
       <button onClick={onSelectAll} style={chipStyle(allSelected)}>Todos</button>
-      {slides.map(s => (
-        <button key={s.id} onClick={() => onToggle(s.name)} style={chipStyle(selected.includes(s.name))}>
-          {s.name}
+      {names.map(name => (
+        <button key={name} onClick={() => onToggle(name)} style={chipStyle(selected.includes(name))}>
+          {name}
         </button>
       ))}
     </div>
@@ -264,9 +264,14 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
   const tc = tissueColor(tissue)
   const [open, setOpen] = useState(defaultOpen)
 
-  // Qué preparados de este bloque están tildados para mostrarse. Arranca con
+  // Nombres únicos de preparados de este bloque (varios preparados distintos
+  // pueden compartir el mismo nombre, ej. dos fotos de "Glándulas-Piel"; se
+  // agrupan bajo un solo chip que selecciona a todos a la vez).
+  const uniqueNames = Array.from(new Set(slides.map(s => s.name)))
+
+  // Qué nombres de preparado están tildados para mostrarse. Arranca con
   // todos seleccionados.
-  const [selectedNames, setSelectedNames] = useState<string[]>(() => slides.map(s => s.name))
+  const [selectedNames, setSelectedNames] = useState<string[]>(() => uniqueNames)
 
   // Si una búsqueda activa hace que este bloque tenga resultados, se abre solo
   useEffect(() => {
@@ -277,7 +282,7 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
   // búsqueda arriba), se resetea la selección a "todos" para no esconder
   // resultados nuevos por una selección vieja.
   useEffect(() => {
-    setSelectedNames(slides.map(s => s.name))
+    setSelectedNames(Array.from(new Set(slides.map(s => s.name))))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slides])
 
@@ -290,7 +295,7 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
       return [...prev, name]
     })
   }
-  function selectAllNames() { setSelectedNames(slides.map(s => s.name)) }
+  function selectAllNames() { setSelectedNames(uniqueNames) }
 
   const visibleSlides = slides.filter(s => selectedNames.includes(s.name))
 
@@ -333,9 +338,9 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
       {/* Selector de preparados + Cards grid */}
       {open && (
         <>
-          {slides.length > 1 && (
+          {uniqueNames.length > 1 && (
             <PreparadoSelector
-              slides={slides}
+              names={uniqueNames}
               selected={selectedNames}
               onToggle={toggleName}
               onSelectAll={selectAllNames}
