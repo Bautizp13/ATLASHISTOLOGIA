@@ -85,6 +85,20 @@ const REVIEW_CARDS: ReviewCard[] = SLIDES.flatMap((slide) =>
 // orden en que aparecen los preparados (sin duplicados).
 const ALL_TISSUES: string[] = Array.from(new Set(SLIDES.map((s) => s.tissue)))
 
+// Detecta si estamos en un viewport "mobile" (por ancho de pantalla) y se
+// actualiza solo si la ventana cambia de tamaño (rotar el celular, resize).
+function useIsMobile(breakpoint = 640): boolean {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= breakpoint
+  )
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth <= breakpoint) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [breakpoint])
+  return isMobile
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -232,9 +246,12 @@ function SlideCard({ slide }: { slide: Slide }) {
 // (ej: "Pie", "Tráquea", "Riñón") se muestran dentro de un mismo bloque de
 // tejido. Selección múltiple: podés dejar tildados solo los que te interesan.
 
-function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent, layout = 'row' }: {
+function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent, layout = 'row', scrollable = false }: {
   names: string[]; selected: string[]; onToggle: (name: string) => void; onSelectAll: () => void; accent: string
   layout?: 'row' | 'column'
+  // scrollable: modo "barra deslizable" para mobile — una sola fila que no
+  // wrappea y se desliza horizontalmente con el dedo.
+  scrollable?: boolean
 }) {
   const allSelected = selected.length === names.length
   const vertical = layout === 'column'
@@ -249,15 +266,20 @@ function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent, lay
     fontSize: '12.5px', fontWeight: active ? 600 : 500,
     cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s ease',
     width: vertical ? '100%' : 'auto',
+    flexShrink: scrollable ? 0 : undefined,
+    whiteSpace: scrollable ? ('nowrap' as const) : undefined,
   })
 
   return (
     <div style={{
       display: 'flex',
       flexDirection: vertical ? 'column' : 'row',
-      flexWrap: vertical ? 'nowrap' : 'wrap',
+      flexWrap: scrollable ? 'nowrap' : (vertical ? 'nowrap' : 'wrap'),
       gap: '7px',
       marginBottom: vertical ? 0 : '20px',
+      overflowX: scrollable ? 'auto' : undefined,
+      WebkitOverflowScrolling: scrollable ? 'touch' : undefined,
+      paddingBottom: scrollable ? '6px' : undefined,
     }}>
       <button onClick={onSelectAll} style={chipStyle(allSelected)}>Todos</button>
       {names.map(name => (
@@ -274,6 +296,7 @@ function PreparadoSelector({ names, selected, onToggle, onSelectAll, accent, lay
 function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; slides: Slide[]; defaultOpen?: boolean }) {
   const tc = tissueColor(tissue)
   const [open, setOpen] = useState(defaultOpen)
+  const isMobile = useIsMobile()
 
   // Nombres únicos de preparados de este bloque (varios preparados distintos
   // pueden compartir el mismo nombre, ej. dos fotos de "Glándulas-Piel"; se
@@ -357,39 +380,61 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
       {open && (
         <div className="tissue-body" style={{
           display: 'flex',
-          gap: '24px',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '14px' : '24px',
           alignItems: 'flex-start',
           marginBottom: '32px',
         }}>
           {(uniqueNames.length > 1 || visibleSlides.length > 1) && (
-            <aside className="tissue-sidebar" style={{
-              flex: '0 0 180px',
-              width: '180px',
-              position: 'sticky',
-              top: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px',
-            }}>
+            <aside
+              className="tissue-sidebar"
+              style={
+                isMobile
+                  ? { width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }
+                  : {
+                      flex: '0 0 180px',
+                      width: '180px',
+                      position: 'sticky',
+                      top: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '14px',
+                    }
+              }
+            >
               {uniqueNames.length > 1 && (
-                <div style={{
-                  background: tc.bg,
-                  border: `1px solid ${tc.border}`,
-                  borderRadius: '12px',
-                  padding: '14px',
-                }}>
-                  <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
-                    Preparados
-                  </p>
+                isMobile ? (
+                  // Mobile: barra horizontal de chips, se elige el preparado
+                  // deslizando con el dedo — nada de sticky, nada de overlap.
                   <PreparadoSelector
                     names={uniqueNames}
                     selected={selectedNames}
                     onToggle={toggleName}
                     onSelectAll={selectAllNames}
                     accent={tc.accent}
-                    layout="column"
+                    layout="row"
+                    scrollable
                   />
-                </div>
+                ) : (
+                  <div style={{
+                    background: tc.bg,
+                    border: `1px solid ${tc.border}`,
+                    borderRadius: '12px',
+                    padding: '14px',
+                  }}>
+                    <p style={{ margin: '0 0 10px', fontSize: '10.5px', letterSpacing: '0.08em', textTransform: 'uppercase', color: tc.accent, fontWeight: 600 }}>
+                      Preparados
+                    </p>
+                    <PreparadoSelector
+                      names={uniqueNames}
+                      selected={selectedNames}
+                      onToggle={toggleName}
+                      onSelectAll={selectAllNames}
+                      accent={tc.accent}
+                      layout="column"
+                    />
+                  </div>
+                )
               )}
 
               {visibleSlides.length > 1 && (
@@ -431,10 +476,10 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
             </aside>
           )}
 
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, width: isMobile ? '100%' : undefined }}>
             {!currentSlide ? (
               <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--muted)' }}>
-                <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado a la izquierda para verlo.</p>
+                <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado {isMobile ? 'arriba' : 'a la izquierda'} para verlo.</p>
               </div>
             ) : (
               <SlideCard key={currentSlide.id} slide={currentSlide} />
@@ -1068,10 +1113,6 @@ export default function App() {
         @media (max-width: 780px) {
           .mascot-pensando-side { display: none; }
           .mascot-pensando-top { display: flex; }
-        }
-        @media (max-width: 640px) {
-          .tissue-body { flex-direction: column; }
-          .tissue-sidebar { position: static; width: 100%; flex-basis: auto; }
         }
       `}</style>
       </div>
