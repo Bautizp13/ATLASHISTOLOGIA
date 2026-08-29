@@ -227,16 +227,72 @@ function SlideCard({ slide }: { slide: Slide }) {
   )
 }
 
+// ─── Selector de preparados dentro de un bloque de tejido ─────────────────────
+// Igual que el TopicSelector de Modo Repaso, pero acá filtra qué preparados
+// (ej: "Pie", "Tráquea", "Riñón") se muestran dentro de un mismo bloque de
+// tejido. Selección múltiple: podés dejar tildados solo los que te interesan.
+
+function PreparadoSelector({ slides, selected, onToggle, onSelectAll, accent }: {
+  slides: Slide[]; selected: string[]; onToggle: (name: string) => void; onSelectAll: () => void; accent: string
+}) {
+  const allSelected = selected.length === slides.length
+
+  const chipStyle = (active: boolean) => ({
+    padding: '6px 14px', borderRadius: '18px',
+    border: active ? `1.5px solid ${accent}` : '1.5px solid rgba(200,140,165,0.35)',
+    background: active ? accent : 'transparent',
+    color: active ? '#fff' : 'var(--muted)',
+    fontSize: '12px', fontWeight: active ? 600 : 500,
+    cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.15s ease',
+  })
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '20px' }}>
+      <button onClick={onSelectAll} style={chipStyle(allSelected)}>Todos</button>
+      {slides.map(s => (
+        <button key={s.id} onClick={() => onToggle(s.name)} style={chipStyle(selected.includes(s.name))}>
+          {s.name}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ─── Tissue Block ─────────────────────────────────────────────────────────────
 
 function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; slides: Slide[]; defaultOpen?: boolean }) {
   const tc = tissueColor(tissue)
   const [open, setOpen] = useState(defaultOpen)
 
+  // Qué preparados de este bloque están tildados para mostrarse. Arranca con
+  // todos seleccionados.
+  const [selectedNames, setSelectedNames] = useState<string[]>(() => slides.map(s => s.name))
+
   // Si una búsqueda activa hace que este bloque tenga resultados, se abre solo
   useEffect(() => {
     if (defaultOpen) setOpen(true)
   }, [defaultOpen])
+
+  // Si cambia la lista de preparados de este bloque (por ejemplo por una
+  // búsqueda arriba), se resetea la selección a "todos" para no esconder
+  // resultados nuevos por una selección vieja.
+  useEffect(() => {
+    setSelectedNames(slides.map(s => s.name))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slides])
+
+  function toggleName(name: string) {
+    setSelectedNames(prev => {
+      if (prev.includes(name)) {
+        const next = prev.filter(n => n !== name)
+        return next.length === 0 ? prev : next
+      }
+      return [...prev, name]
+    })
+  }
+  function selectAllNames() { setSelectedNames(slides.map(s => s.name)) }
+
+  const visibleSlides = slides.filter(s => selectedNames.includes(s.name))
 
   return (
     <section style={{ marginBottom: '20px' }}>
@@ -274,16 +330,34 @@ function TissueBlock({ tissue, slides, defaultOpen = false }: { tissue: string; 
         </svg>
       </button>
 
-      {/* Cards grid */}
+      {/* Selector de preparados + Cards grid */}
       {open && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(440px, 100%), 1fr))',
-          gap: '20px',
-          marginBottom: '32px',
-        }}>
-          {slides.map(s => <SlideCard key={s.id} slide={s} />)}
-        </div>
+        <>
+          {slides.length > 1 && (
+            <PreparadoSelector
+              slides={slides}
+              selected={selectedNames}
+              onToggle={toggleName}
+              onSelectAll={selectAllNames}
+              accent={tc.accent}
+            />
+          )}
+
+          {visibleSlides.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--muted)', marginBottom: '32px' }}>
+              <p style={{ margin: 0, fontSize: '13.5px' }}>Elegí al menos un preparado arriba para verlo.</p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(440px, 100%), 1fr))',
+              gap: '20px',
+              marginBottom: '32px',
+            }}>
+              {visibleSlides.map(s => <SlideCard key={s.id} slide={s} />)}
+            </div>
+          )}
+        </>
       )}
     </section>
   )
