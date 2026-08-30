@@ -1,0 +1,43 @@
+{
+  "id": 33,
+  "slug": "musculo-cardiaco",
+  "name": "Músculo cardíaco",
+  "tissue": "Tejido Muscular",
+  "structure": "Corazón",
+  "stain": "H&E",
+  "img": "/images/33-corazon-muscular.jpg",
+  "markers": [
+    {
+      "x": 26.7,
+      "y": 56.7,
+      "label": "1"
+    },
+    {
+      "x": 54.3,
+      "y": 57.1,
+      "label": "2"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Cardiomiocito. Nótese la disposición ramificada y el núcleo central."
+    },
+    {
+      "label": "2",
+      "text": "Tejido muscular liso"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué estructura es?",
+      "answer": "Cardiomiocito"
+    },
+    {
+      "marker": "2",
+      "question": "¿Qué tejido es?",
+      "answer": "Tejido muscular cardíaco"
+    }
+  ]
+}
