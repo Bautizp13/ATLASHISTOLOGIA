@@ -1,0 +1,57 @@
+{
+  "id": 36,
+  "slug": "yeyuno",
+  "name": "Yeyuno",
+  "tissue": "Tejido Muscular",
+  "structure": "Músculo liso",
+  "stain": "H&E",
+  "img": "/images/36-yeyuno-muscular.jpg",
+  "markers": [
+    {
+      "x": 42.7,
+      "y": 44,
+      "label": "1"
+    },
+    {
+      "x": 79.7,
+      "y": 61.6,
+      "label": "2"
+    },
+    {
+      "x": 58.7,
+      "y": 34.5,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Tejido muscular liso (corte longitudinal)"
+    },
+    {
+      "label": "2",
+      "text": "Tejido muscular liso (corte transversal)"
+    },
+    {
+      "label": "3",
+      "text": "Miocito"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué tejido es?",
+      "answer": "Tejido muscular liso (corte longitudinal)"
+    },
+    {
+      "marker": "2",
+      "question": "¿Qué tejido es?",
+      "answer": "Tejido muscular liso (corte transversal)"
+    },
+    {
+      "marker": "3",
+      "question": "¿Qué célula es?",
+      "answer": "Miocito"
+    }
+  ]
+}
