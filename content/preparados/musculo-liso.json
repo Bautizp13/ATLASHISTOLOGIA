@@ -1,0 +1,29 @@
+{
+  "id": 35,
+  "slug": "musculo-liso",
+  "name": "Músculo liso",
+  "tissue": "Tejido Muscular",
+  "structure": "Yeyuno - Capa muscular",
+  "stain": "H&E",
+  "img": "/images/35-yeyuno-muscular.jpg",
+  "markers": [
+    {
+      "x": 48.1,
+      "y": 48.9,
+      "label": "1"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Músculo liso"
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué tejido es?",
+      "answer": "Músculo liso"
+    }
+  ]
+}
