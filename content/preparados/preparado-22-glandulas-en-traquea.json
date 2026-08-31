@@ -1,0 +1,41 @@
+{
+  "id": 22,
+  "slug": "glandulas-en-traquea",
+  "name": "Glándulas en Traquea.",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glándulas mixtas.",
+  "stain": "H&E",
+  "img": "/images/23-traquea-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 20,
+      "y": 57.5,
+      "label": "1"
+    },
+    {
+      "x": 29.2,
+      "y": 32,
+      "label": "2"
+    },
+    {
+      "x": 55.2,
+      "y": 19.1,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Semiluna serosa"
+    },
+    {
+      "label": "2",
+      "text": "Porción mucosa."
+    },
+    {
+      "label": "3",
+      "text": "Acino serorso."
+    }
+  ],
+  "flashcards": []
+}

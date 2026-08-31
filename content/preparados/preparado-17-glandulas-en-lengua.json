@@ -1,0 +1,41 @@
+{
+  "id": 17,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glándulas",
+  "stain": "H&E",
+  "img": "/images/17-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 69.6,
+      "y": 25.6,
+      "label": "1"
+    },
+    {
+      "x": 33.5,
+      "y": 56,
+      "label": "2"
+    },
+    {
+      "x": 9.2,
+      "y": 32.4,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Acinos mucosos."
+    },
+    {
+      "label": "2",
+      "text": "Acinos serosos."
+    },
+    {
+      "label": "3",
+      "text": "Músculo."
+    }
+  ],
+  "flashcards": []
+}

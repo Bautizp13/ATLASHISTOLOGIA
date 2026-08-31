@@ -1,0 +1,47 @@
+{
+  "id": 18,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Acino mucoso.",
+  "stain": "H&E",
+  "img": "/images/18-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 84.5,
+      "y": 48.1,
+      "label": "1"
+    },
+    {
+      "x": 14,
+      "y": 37.2,
+      "label": "2"
+    },
+    {
+      "x": 60.9,
+      "y": 75,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Conducto excretor"
+    },
+    {
+      "label": "2",
+      "text": "Acino mucoso"
+    },
+    {
+      "label": "3",
+      "text": "Tejido conectivo."
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué estructura marca la flecha?",
+      "answer": "Conducto excretor."
+    }
+  ]
+}

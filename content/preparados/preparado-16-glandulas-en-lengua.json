@@ -1,0 +1,57 @@
+{
+  "id": 16,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Glandulas",
+  "stain": "H&E",
+  "img": "/images/16-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 81.7,
+      "y": 55.9,
+      "label": "1"
+    },
+    {
+      "x": 30.6,
+      "y": 55.7,
+      "label": "2"
+    },
+    {
+      "x": 47.1,
+      "y": 48.6,
+      "label": "3"
+    },
+    {
+      "x": 3.4,
+      "y": 63,
+      "label": "3"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Glándulas salivales de secreción mucosa."
+    },
+    {
+      "label": "2",
+      "text": "Glándulas salivales de secreción serosa."
+    },
+    {
+      "label": "3",
+      "text": "Músculo."
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qué acino marca la flecha?",
+      "answer": "Acino mucoso."
+    },
+    {
+      "marker": "2",
+      "question": "¿Qué acino marca la flecha?",
+      "answer": "Acino mucoso."
+    }
+  ]
+}

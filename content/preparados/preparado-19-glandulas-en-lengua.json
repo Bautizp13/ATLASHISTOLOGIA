@@ -1,0 +1,37 @@
+{
+  "id": 19,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Acinos serosos,",
+  "stain": "H&E",
+  "img": "/images/19-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 15.9,
+      "y": 11.3,
+      "label": "1"
+    },
+    {
+      "x": 21.1,
+      "y": 39.8,
+      "label": "2"
+    },
+    {
+      "x": 75.5,
+      "y": 30.4,
+      "label": "2"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Conducto excretor."
+    },
+    {
+      "label": "2",
+      "text": "Glándulas salivales."
+    }
+  ],
+  "flashcards": []
+}

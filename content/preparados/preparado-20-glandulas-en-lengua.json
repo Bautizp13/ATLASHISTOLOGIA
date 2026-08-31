@@ -1,0 +1,43 @@
+{
+  "id": 20,
+  "slug": "glandulas-en-lengua",
+  "name": "Glándulas en Lengua",
+  "tissue": "Tejido Epitelial glandular",
+  "structure": "Conducto excretor.",
+  "stain": "H&E",
+  "img": "/images/20-lengua-he-glandular.jpg",
+  "markers": [
+    {
+      "x": 79.6,
+      "y": 50.5,
+      "label": "1"
+    },
+    {
+      "x": 72.5,
+      "y": 26.9,
+      "label": "2"
+    },
+    {
+      "x": 80.5,
+      "y": 65.1,
+      "label": "2"
+    }
+  ],
+  "annotations": [
+    {
+      "label": "1",
+      "text": "Conducto excretor, ep. cúbico biestratificado."
+    },
+    {
+      "label": "2",
+      "text": "Células mioepiteliales."
+    }
+  ],
+  "flashcards": [
+    {
+      "marker": "1",
+      "question": "¿Qúe epitelio tiene la flecha? ¿A que tejido y órgano pertenece?",
+      "answer": "Ep. cúbico biestratificado, Tejido Epitelial Glandular, Lengua"
+    }
+  ]
+}
