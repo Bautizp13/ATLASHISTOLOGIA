@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { MastocitoPensando, MastocitoCorriendo, MastocitoSaludando, MastocitoSorprendido } from './Mastocito'
 
 // ─── Imágenes ────────────────────────────────────────────────────────────────
@@ -11,11 +11,38 @@ function img(filename: string) {
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-interface Marker { x: number; y: number; label: string }
+// Una marca sobre la foto puede ser una flecha (un punto), un óvalo (para
+// estructuras redondeadas de ancho variable) o un corchete (para estructuras
+// alargadas, tipo "línea con topes"). El campo "type" decide cómo se dibuja.
+interface MarkerArrow {
+  type: 'arrow'
+  x: number
+  y: number
+  label: string
+}
+interface MarkerOval {
+  type: 'oval'
+  x: number   // centro, % del ancho
+  y: number   // centro, % del alto
+  rx: number  // radio horizontal, % del ancho
+  ry: number  // radio vertical, % del alto
+  label: string
+}
+interface MarkerBracket {
+  type: 'bracket'
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  flip?: boolean // de qué lado de la línea "abre" el corchete
+  label: string
+}
+type Marker = MarkerArrow | MarkerOval | MarkerBracket
+
 interface Annotation { label: string; text: string }
 
-// Una pregunta de Modo Repaso: apunta a una flecha por su etiqueta (label).
-// Un mismo preparado puede tener varias, incluso repitiendo la misma flecha.
+// Una pregunta de Modo Repaso: apunta a una marca por su etiqueta (label).
+// Un mismo preparado puede tener varias, incluso repitiendo la misma marca.
 interface FlashcardData { marker: string; question: string; answer: string }
 
 interface Slide {
@@ -30,7 +57,7 @@ interface Slide {
   flashcards: FlashcardData[]
 }
 
-// Una tarjeta ya "resuelta" para Modo Repaso: el preparado + la flecha concreta
+// Una tarjeta ya "resuelta" para Modo Repaso: el preparado + la marca concreta
 // que le corresponde a esa pregunta (buscada por label dentro de slide.markers).
 interface ReviewCard {
   slide: Slide
@@ -40,6 +67,41 @@ interface ReviewCard {
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
+
+// Convierte una marca cruda del JSON al tipo interno. Los preparados viejos
+// (cargados antes de que existieran óvalos/corchetes) no tienen "type": se
+// interpretan como flecha, igual que siempre.
+function normalizeMarker(raw: any): Marker | null {
+  if (!raw || typeof raw !== 'object') return null
+  if (raw.type === 'oval') {
+    return {
+      type: 'oval',
+      x: Number(raw.x) || 0,
+      y: Number(raw.y) || 0,
+      rx: Number(raw.rx) || 5,
+      ry: Number(raw.ry) || 5,
+      label: String(raw.label ?? ''),
+    }
+  }
+  if (raw.type === 'bracket') {
+    return {
+      type: 'bracket',
+      x1: Number(raw.x1) || 0,
+      y1: Number(raw.y1) || 0,
+      x2: Number(raw.x2) || 0,
+      y2: Number(raw.y2) || 0,
+      flip: !!raw.flip,
+      label: String(raw.label ?? ''),
+    }
+  }
+  // "type: arrow" o sin "type" (formato viejo)
+  return {
+    type: 'arrow',
+    x: Number(raw.x) || 0,
+    y: Number(raw.y) || 0,
+    label: String(raw.label ?? ''),
+  }
+}
 
 // Los preparados se cargan automáticamente desde content/preparados/*.json
 // (esos archivos los edita el panel de administración en /admin, sin tocar código).
@@ -57,7 +119,7 @@ const SLIDES: Slide[] = Object.values(preparadoFiles)
       structure: raw.structure,
       stain: raw.stain,
       img: img(filename),
-      markers: raw.markers ?? [],
+      markers: ((raw.markers ?? []) as any[]).map(normalizeMarker).filter((m): m is Marker => m !== null),
       annotations: raw.annotations ?? [],
       flashcards: raw.flashcards ?? [],
     } as Slide
@@ -65,11 +127,11 @@ const SLIDES: Slide[] = Object.values(preparadoFiles)
   .sort((a, b) => a.id - b.id)
 
 // Aplana todas las preguntas de todos los preparados en una sola lista de
-// tarjetas para Modo Repaso. Cada flashcard del JSON apunta a una flecha por
+// tarjetas para Modo Repaso. Cada flashcard del JSON apunta a una marca por
 // su "label"; acá se resuelve esa referencia contra slide.markers para saber
-// dónde dibujar la flecha en la imagen. Si la flecha referenciada no existe
+// dónde dibujar la marca en la imagen. Si la marca referenciada no existe
 // (por ejemplo se borró), esa pregunta se descarta en vez de romper la app.
-// Si dos flechas del mismo preparado comparten la misma etiqueta, se usa la
+// Si dos marcas del mismo preparado comparten la misma etiqueta, se usa la
 // primera que aparece — cualquiera de las dos sirve, apuntan a lo mismo.
 const REVIEW_CARDS: ReviewCard[] = SLIDES.flatMap((slide) =>
   slide.flashcards
@@ -99,6 +161,26 @@ function useIsMobile(breakpoint = 640): boolean {
   return isMobile
 }
 
+// Mide el tamaño real (en px) de un elemento y se actualiza si cambia
+// (resize de ventana, layout responsive, etc). Lo usan las marcas tipo
+// "corchete", que necesitan saber el ancho/alto reales del contenedor de la
+// imagen para dibujar sus topes perpendiculares correctamente sin importar
+// el aspect-ratio de cada vista (3/2 en el Atlas, 16/9 en Modo Repaso).
+function useElementSize<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const update = () => setSize({ width: el.clientWidth, height: el.clientHeight })
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [ref, size] as const
+}
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -122,9 +204,11 @@ function tissueColor(tissue: string) {
   return TISSUE_COLORS[tissue] ?? { accent: '#b5365a', bg: '#fff0f3', border: 'rgba(181,54,90,0.18)', badge: 'rgba(181,54,90,0.1)' }
 }
 
-// ─── Red Arrow ───────────────────────────────────────────────────────────────
+// ─── Marker shapes (flecha / óvalo / corchete) ────────────────────────────────
+// Dibuja cualquiera de los tres tipos de marca sobre la imagen. `label` puede
+// pisarse (ej. "?" en Modo Repaso) para no revelar la respuesta antes de tiempo.
 
-function RedArrow({ x, y, label, color = '#FFEB00' }: { x: number; y: number; label: string; color?: string }) {
+function ArrowShape({ x, y, label, color = '#FFEB00' }: { x: number; y: number; label: string; color?: string }) {
   return (
     <div
       style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -100%)' }}
@@ -141,11 +225,94 @@ function RedArrow({ x, y, label, color = '#FFEB00' }: { x: number; y: number; la
   )
 }
 
+// El óvalo se dibuja con divs de CSS puro (ancho/alto en % del contenedor),
+// así se adapta automáticamente a cualquier aspect-ratio sin cuentas en px.
+function OvalShape({ marker, label, color = '#FFEB00' }: { marker: MarkerOval; label: string; color?: string }) {
+  const { x, y, rx, ry } = marker
+  return (
+    <>
+      <div
+        className="pointer-events-none select-none"
+        style={{
+          position: 'absolute',
+          left: `${x}%`, top: `${y}%`,
+          width: `${rx * 2}%`, height: `${ry * 2}%`,
+          transform: 'translate(-50%, -50%)',
+          borderRadius: '50%',
+          border: `4.5px solid #1a1a1a`,
+          boxShadow: `inset 0 0 0 2.5px ${color}`,
+        }}
+      />
+      <div
+        className="pointer-events-none select-none"
+        style={{ position: 'absolute', left: `${x}%`, top: `${y - ry}%`, transform: 'translate(-50%, -50%)' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="9" cy="9" r="8" fill={color} stroke="#1a1a1a" strokeWidth="1.2"/>
+          <text x="9" y="12.5" textAnchor="middle" fontSize="8" fontWeight="700" fill="#1a1a1a" fontFamily="Inter, sans-serif">{label}</text>
+        </svg>
+      </div>
+    </>
+  )
+}
+
+// El corchete necesita el tamaño real (px) del contenedor para que los topes
+// queden perpendiculares a la línea sin importar el aspect-ratio de la vista.
+function BracketShape({ marker, label, containerW, containerH, color = '#FFEB00' }: {
+  marker: MarkerBracket; label: string; containerW: number; containerH: number; color?: string
+}) {
+  if (!containerW || !containerH) return null
+  const { x1, y1, x2, y2, flip } = marker
+  const x1px = (x1 / 100) * containerW, y1px = (y1 / 100) * containerH
+  const x2px = (x2 / 100) * containerW, y2px = (y2 / 100) * containerH
+  const dx = x2px - x1px, dy = y2px - y1px
+  const len = Math.hypot(dx, dy) || 1
+  const ux = dx / len, uy = dy / len
+  let nx = -uy, ny = ux
+  if (flip) { nx = -nx; ny = -ny }
+  const tick = 9
+
+  const minX = Math.min(x1px, x2px) - tick - 6, minY = Math.min(y1px, y2px) - tick - 6
+  const maxX = Math.max(x1px, x2px) + tick + 6, maxY = Math.max(y1px, y2px) + tick + 6
+  const svgW = maxX - minX, svgH = maxY - minY
+  const ox = x1px - minX, oy = y1px - minY
+  const ex = x2px - minX, ey = y2px - minY
+  const midx = (ox + ex) / 2 + nx * (tick + 5)
+  const midy = (oy + ey) / 2 + ny * (tick + 5)
+
+  const path = `M${ox + nx * tick},${oy + ny * tick} L${ox},${oy} L${ex},${ey} L${ex + nx * tick},${ey + ny * tick}`
+
+  return (
+    <div
+      className="pointer-events-none select-none"
+      style={{ position: 'absolute', left: minX, top: minY }}
+    >
+      <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} fill="none" style={{ overflow: 'visible' }}>
+        <path d={path} stroke="#1a1a1a" strokeWidth={4.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <path d={path} stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        <circle cx={midx} cy={midy} r={8} fill={color} stroke="#1a1a1a" strokeWidth={1} />
+        <text x={midx} y={midy + 3.5} textAnchor="middle" fontSize="8" fontWeight="700" fill="#1a1a1a" fontFamily="Inter, sans-serif">{label}</text>
+      </svg>
+    </div>
+  )
+}
+
+// Componente unificado: recibe cualquier tipo de marca y dibuja lo que corresponda.
+function MarkerShape({ marker, label, containerW = 0, containerH = 0, color }: {
+  marker: Marker; label?: string; containerW?: number; containerH?: number; color?: string
+}) {
+  const shownLabel = label ?? marker.label
+  if (marker.type === 'oval') return <OvalShape marker={marker} label={shownLabel} color={color} />
+  if (marker.type === 'bracket') return <BracketShape marker={marker} label={shownLabel} containerW={containerW} containerH={containerH} color={color} />
+  return <ArrowShape x={marker.x} y={marker.y} label={shownLabel} color={color} />
+}
+
 // ─── Slide Card ───────────────────────────────────────────────────────────────
 
 function SlideCard({ slide }: { slide: Slide }) {
   const [showMarked, setShowMarked] = useState(false)
   const tc = tissueColor(slide.tissue)
+  const [imgBoxRef, imgBoxSize] = useElementSize<HTMLDivElement>()
 
   return (
     <article style={{
@@ -196,14 +363,14 @@ function SlideCard({ slide }: { slide: Slide }) {
       </div>
 
       {/* Image */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '3/2', background: '#f3e8ec' }}>
+      <div ref={imgBoxRef} style={{ position: 'relative', width: '100%', aspectRatio: '3/2', background: '#f3e8ec' }}>
         <img
           src={slide.img}
           alt={slide.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
         {showMarked && slide.markers.map((m, i) => (
-          <RedArrow key={m.label + '-' + i} x={m.x} y={m.y} label={m.label} />
+          <MarkerShape key={m.label + '-' + i} marker={m} containerW={imgBoxSize.width} containerH={imgBoxSize.height} />
         ))}
         {!showMarked && (
           <div style={{
@@ -525,7 +692,7 @@ function TopicSelector({ selected, onToggle, onSelectAll }: {
 }
 
 // ─── Flashcard ────────────────────────────────────────────────────────────────
-// Recibe una ReviewCard (preparado + flecha concreta + pregunta + respuesta),
+// Recibe una ReviewCard (preparado + marca concreta + pregunta + respuesta),
 // no un Slide entero: un mismo preparado puede aportar varias tarjetas.
 
 function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
@@ -534,11 +701,12 @@ function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
 }) {
   const { slide, marker, question, answer } = card
   const tc = tissueColor(slide.tissue)
+  const [imgBoxRef, imgBoxSize] = useElementSize<HTMLDivElement>()
 
   return (
     <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0' }}>
 
-      {/* Progress — a propósito no muestra a qué preparado pertenece la flecha,
+      {/* Progress — a propósito no muestra a qué preparado pertenece la marca,
           para no regalar la respuesta antes de tiempo. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px' }}>
         <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
@@ -565,18 +733,18 @@ function Flashcard({ card, onNext, onPrev, index, total, revealed, onReveal }: {
             <text x="8" y="12.5" textAnchor="middle" fontSize="9.5" fontWeight="700" fill={tc.accent} fontFamily="Inter, sans-serif">?</text>
           </svg>
           <p style={{ margin: 0, fontSize: '13px', color: tc.accent, fontWeight: 500 }}>
-            {question?.trim() || '¿Qué estructura señala la flecha roja?'}
+            {question?.trim() || '¿Qué estructura señala la marca roja?'}
           </p>
         </div>
 
         {/* Image */}
-        <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f3e8ec' }}>
+        <div ref={imgBoxRef} style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f3e8ec' }}>
           <img
             src={slide.img}
             alt="Preparado histológico"
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
-          <RedArrow x={marker.x} y={marker.y} label="?" />
+          <MarkerShape marker={marker} label="?" containerW={imgBoxSize.width} containerH={imgBoxSize.height} />
         </div>
 
         {/* Answer */}
@@ -953,7 +1121,7 @@ export default function App() {
                 Flashcards Histológicas
               </h1>
               <p style={{ margin: '0 auto', fontSize: '15px', color: 'var(--muted)', maxWidth: '440px', lineHeight: 1.7 }}>
-                Observa la flecha roja e intenta identificar la estructura antes de revelar la respuesta.
+                Observa la marca roja e intenta identificar la estructura antes de revelar la respuesta.
               </p>
             </div>
 
